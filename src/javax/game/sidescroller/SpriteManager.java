@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class SpriteManager implements KeyListener {
      */
     public SpriteManager ( ) {
         this.spriteWatchers = new HashSet<SpriteListener> ( );
-        this.sprites = new LinkedList<Sprite> ( );
+        this.sprites = Collections.synchronizedList ( new LinkedList<Sprite> ( ) );
     }
 
     /**
@@ -44,7 +45,20 @@ public class SpriteManager implements KeyListener {
      * @param s The sprite to add
      */
     public void addSprite ( Sprite s ) {
-        this.sprites.add ( s );
+        synchronized ( this.sprites ) {
+            this.sprites.add ( s );
+        }
+    }
+
+    /**
+     * Removes the given sprite from the Sprite list.
+     * 
+     * @param s Sprite to remove
+     */
+    public void removeSprite ( Sprite s ) {
+        synchronized ( this.sprites ) {
+            this.sprites.remove ( s );
+        }
     }
 
     /**
@@ -69,21 +83,33 @@ public class SpriteManager implements KeyListener {
         for ( Sprite s : this.sprites )
             s.tick ( );
 
+        Set<Sprite> toRemove = new HashSet<Sprite> ( );
+
         /**
          * Sprite event detection
          */
         int sprite = 0;
-        for ( Sprite s : this.sprites ) {
-            if ( this.worldArea != null && !this.worldArea.contains ( s.getRectangle ( ) ) )
-                s.leavingGameArea();
-            
-            for ( int j = sprite++; j < this.sprites.size ( ); j++ ) {
-                Sprite s2 = this.sprites.get ( j );
-                if ( s.collides ( s2 ) )
-                    for ( SpriteListener c : this.spriteWatchers )
-                        c.handleCollision ( s, s2 );
+        synchronized ( this.sprites ) {
+            for ( Sprite s : this.sprites ) {
+                if ( this.worldArea != null && !this.worldArea.contains ( s.getRectangle ( ) ) ) {
+                    Set<Sprite> r = s.leavingGameArea ( );
+                    if ( r != null )
+                        toRemove.addAll ( r );
+                }
+
+                for ( int j = sprite++; j < this.sprites.size ( ); j++ ) {
+                    Sprite s2 = this.sprites.get ( j );
+                    if ( s.collides ( s2 ) )
+                        for ( SpriteListener c : this.spriteWatchers ) {
+                            Set<Sprite> r = c.handleCollision ( s, s2 );
+                            if ( r != null )
+                                toRemove.addAll ( r );
+                        }
+                }
             }
         }
+
+        this.sprites.removeAll ( toRemove );
     }
 
     /**

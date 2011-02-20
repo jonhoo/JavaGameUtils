@@ -388,14 +388,42 @@ public abstract class Sprite implements KeyListener {
      * 
      * Default behaviour is to stop the sprite on the edge so
      * that it remains fully visible.
+     * @return The set of sprites that should be removed as a result of this operation
      */
-    public void leavingGameArea ( ) {
+    public Set<Sprite> leavingGameArea ( ) {
         Rectangle frame = this.game.getVisibleMapRectangle ( );
         Rectangle sprite = this.getRectangle ( );
         
+        if ( this.position.x <= frame.x ) {
+            this.position.x = frame.x;
+            if ( this.getXSpeed ( ) < 0 )
+                this.setXSpeed ( -1 * this.getXSpeed ( ) );
+        }
+        if ( this.position.y <= frame.y ) {
+            this.position.y = frame.y;
+            if ( this.getYSpeed ( ) < 0 )
+                this.setYSpeed ( -1 * this.getYSpeed ( ) );
+        }
+        if ( this.position.x >= frame.x + ( frame.width - sprite.width ) ) {
+            this.position.x = frame.x + ( frame.width - sprite.width );
+            if ( this.getXSpeed ( ) > 0 )
+                this.setXSpeed ( -1 * this.getXSpeed ( ) );
+        }
+        if ( this.position.y >= frame.y + ( frame.height - sprite.height ) ) {
+            this.position.y = frame.y + ( frame.height - sprite.height );
+            if ( this.getYSpeed ( ) > 0 )
+                this.setYSpeed ( -1 * this.getYSpeed ( ) );
+        }
+        
+        /**
+         * Cleaner, but less good version
+         *
         this.position.x = Math.max ( frame.x, this.position.x );
         this.position.y = Math.max ( frame.y, this.position.y );
         this.position.x = Math.min ( this.position.x, frame.x + ( frame.width - sprite.width ) );
         this.position.y = Math.min ( this.position.y, frame.y + ( frame.height - sprite.height ) );
+        */
+        
+        return null;
     }
 }

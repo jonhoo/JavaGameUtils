@@ -73,8 +73,8 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     protected int ticksPerUpdate = 5;
 
     protected RibbonsManager ribbons;
-    protected SpriteManager sprites;
-    protected ImageLoader images;
+    public SpriteManager sprites;
+    public ImageLoader images;
     protected SoundLoader sounds;
 
     /**

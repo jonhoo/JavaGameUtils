@@ -26,7 +26,7 @@ public abstract class GameBase extends JFrame implements WindowListener {
     }
 
     public void windowActivated ( WindowEvent e ) {
-        this.game.resume ( );
+        //this.game.resume ( );
     }
 
     public void windowDeactivated ( WindowEvent e ) {
@@ -34,7 +34,7 @@ public abstract class GameBase extends JFrame implements WindowListener {
     }
 
     public void windowDeiconified ( WindowEvent e ) {
-        this.game.resume ( );
+        //this.game.resume ( );
     }
 
     public void windowIconified ( WindowEvent e ) {

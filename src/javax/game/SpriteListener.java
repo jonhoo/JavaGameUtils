@@ -1,5 +1,7 @@
 package javax.game;
 
+import java.util.Set;
+
 import javax.game.sidescroller.Sprite;
 
 /**
@@ -9,6 +11,8 @@ import javax.game.sidescroller.Sprite;
 public interface SpriteListener {
     /**
      * Called when Sprite a and Sprite b collide
+     * 
+     * @return The set of sprites to remove as a result of this collision
      */
-    public void handleCollision ( Sprite a, Sprite b );
+    public Set<Sprite> handleCollision ( Sprite a, Sprite b );
 }
