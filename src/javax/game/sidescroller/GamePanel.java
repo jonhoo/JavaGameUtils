@@ -49,10 +49,12 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * rendering due to system load.
      */
     private long lastTickTime;
-    private volatile boolean firstTick = true;
+    protected volatile boolean firstTick = true;
     private volatile int skippedFrames = 0;
     private volatile int frames = 0;
 
+    protected boolean paused = false;
+    
     /**
      * If the time between one render finishes, and
      * the next is called drops below this value in
@@ -144,7 +146,10 @@ public abstract class GamePanel extends JPanel implements ActionListener {
 
         System.out.format ( "Inter-frame delay: %d ms with tickrate %d\n", (int) Math.round ( 1000.0 / this.tickrate ), this.tickrate );
         this.timer = new Timer ( (int) Math.round ( 1000.0 / this.tickrate ), this );
-        this.timer.setInitialDelay ( 0 );
+        /**
+         * Initial delay should be straight after we've started the game so we can draw straightaway
+         */
+        this.timer.setInitialDelay ( 1 );
     }
 
     /**
@@ -171,6 +176,15 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed ( ActionEvent e ) {
 
+        if ( this.firstTick ) {
+            this.render ( );
+            this.draw ( );
+            this.firstTick = false;
+            return;
+        }
+        if ( this.paused )
+            return;
+        
         if ( this.frames == 0 ) {
             this.position = this.tick ( );
 
@@ -187,21 +201,15 @@ public abstract class GamePanel extends JPanel implements ActionListener {
                 this.sprites.tick ( );
         }
 
-        if ( this.firstTick ) {
+        long timeDiff = System.currentTimeMillis ( ) - this.lastTickTime;
+
+        // If animation is taking too long, we skip render/draw, and just update game state
+        if ( this.skippedFrames > this.maxFrameSkips || timeDiff + this.timerSlack > this.timer.getDelay ( ) ) {
             this.render ( );
             this.draw ( );
+            this.skippedFrames = 0;
         } else {
-            long timeDiff = System.currentTimeMillis ( ) - this.lastTickTime;
-
-            // If animation is taking too long, we skip render/draw, and just update game state
-            if ( this.skippedFrames > this.maxFrameSkips && timeDiff + this.timerSlack > this.timer.getDelay ( ) ) {
-                this.render ( );
-                this.draw ( );
-                this.skippedFrames = 0;
-            } else {
-                this.skippedFrames++;
-            }
-
+            this.skippedFrames++;
         }
 
         this.frames = ( this.frames + 1 ) % this.ticksPerUpdate;
@@ -282,7 +290,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * Called to resume the game
      */
     public void resume ( ) {
-        this.timer.start ( );
+        this.paused = false;
         this.onResume ( );
     }
 
@@ -298,14 +306,14 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * @return true if the game is paused
      */
     public boolean isPaused ( ) {
-        return !this.timer.isRunning ( );
+        return this.paused;
     }
 
     /**
      * Called to pause the game
      */
     public void pause ( ) {
-        this.timer.stop ( );
+        this.paused = true;
         this.onPause ( );
     }
 
