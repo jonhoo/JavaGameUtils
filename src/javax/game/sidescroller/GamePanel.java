@@ -149,7 +149,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
         /**
          * Initial delay should be straight after we've started the game so we can draw straightaway
          */
-        this.timer.setInitialDelay ( 1 );
+        this.timer.setInitialDelay ( 100 );
     }
 
     /**
