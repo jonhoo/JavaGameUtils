@@ -60,7 +60,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * milliseconds, we skip one rendering cycle to
      * let the graphics system catch up.
      */
-    protected int timerSlack = 300;
+    protected int timerSlack = 100;
 
     /**
      * Never skip more than this many frames in a row.
@@ -191,14 +191,17 @@ public abstract class GamePanel extends JPanel implements ActionListener {
                 this.sprites.tick ( );
         }
 
-        long timeDiff = System.currentTimeMillis ( ) - this.lastTickTime;
+        long timeDiff = System.currentTimeMillis ( ) - this.lastTickTime - this.timer.getDelay();
 
         // If animation is taking too long, we skip render/draw, and just update game state
-        if ( this.skippedFrames > this.maxFrameSkips || timeDiff + this.timerSlack > this.timer.getDelay ( ) ) {
+        if ( this.skippedFrames > this.maxFrameSkips || timeDiff < timerSlack ) {
             this.render ( );
             this.draw ( );
             this.skippedFrames = 0;
         } else {
+            System.out.println ( "Skipping frame" );
+            System.out.println ( "diff is " + (timeDiff - this.timer.getDelay()) + ", which is more than " + this.timerSlack );
+            System.out.println ( "Skipped frames is " + this.skippedFrames + " vs. max of " + this.maxFrameSkips );
             this.skippedFrames++;
         }
 
