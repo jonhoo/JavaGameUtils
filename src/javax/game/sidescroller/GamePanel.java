@@ -49,7 +49,6 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * rendering due to system load.
      */
     private long lastTickTime;
-    protected volatile boolean firstTick = true;
     private volatile int skippedFrames = 0;
     private volatile int frames = 0;
 
@@ -61,7 +60,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
      * milliseconds, we skip one rendering cycle to
      * let the graphics system catch up.
      */
-    protected int timerSlack = 500;
+    protected int timerSlack = 300;
 
     /**
      * Never skip more than this many frames in a row.
@@ -176,16 +175,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed ( ActionEvent e ) {
 
-        if ( this.firstTick ) {
-            this.render ( );
-            this.draw ( );
-            this.firstTick = false;
-            return;
-        }
-        if ( this.paused )
-            return;
-        
-        if ( this.frames == 0 ) {
+        if ( !this.paused && this.frames == 0 ) {
             this.position = this.tick ( );
 
             if ( this.worldArea != null ) {

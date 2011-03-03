@@ -15,12 +15,12 @@ public abstract class GameBase extends JFrame implements WindowListener {
         this.game = game;
         this.game.setParent ( this );
 
-        this.setLocationRelativeTo ( null );
         this.setContentPane ( this.game );
         this.addWindowListener ( this );
         this.setSize ( this.game.getSize ( ) );
         this.setResizable ( false );
         this.setVisible ( true );
+        this.setLocationRelativeTo ( null );
         
         this.game.start ( );
     }
